@@ -1,0 +1,149 @@
+========== BASH COMMANDS/UTILITIES ==========
+
+THE MOST IMPORTANT COMMANDS/FLAGS:
+- man cmdname will bring up the manpages for cmdname
+- --h or --help will, for most commands, bring up a help/usage menu
+- info cmdname will (in some environments) bring up the info page for cmdname 
+===== FILE OPERATIONS =====
+
+cat - prints contents of file to a terminal
+    * if no argument is provided, takes input via STDIN
+    * usually used with an argument of the file(s) to output the contents of. careful.. outputting binary data can fuck up the terminal display
+cp - copies a file
+diff - compares files line-by-line and outputs any differences between them
+file - determines most likely type of file(s)
+    * argument(s) are the file(s) to look at the types of
+    * this cmd works by analyzing the data/magic numbers of the files to determine if its a well-known file format
+mkdir - creates a directory
+mv - moves a file. also used for renaming
+touch - creates files if they do not exist. updates last modified time attribute if they exist 
+===== ENCODINGS =====
+
+base64 - b64 encode/decode
+tr - translates one character set to another. 
+    * rot13 can be easily implemented using this 
+===== ARCHIVING =====
+
+bzip2 - bzip2 archiving utility. analagous to .zip
+gzip - gzip archiving utility. analagous to .zip
+tar - tar archiving utility. think of it as like a .zip but on unix systems 
+===== SYSTEM/ENVIRONMENT =====
+
+cd - changes current working directory (cwd)
+    * if no argument is provided, sets cwd to ~
+    * usually used with an argument (either absolute or relative path) to directory to change to (i.e. cd .. or cd /tmp/zoogs123)
+du - provides info on Disk Usage for a given directory
+    * by default shows info for the cwd, non-recursive
+find - locates a file based on various criteria
+    * by default, looks in the current directory
+    * just check the help or manpage for the different things you can search for and the format lmao
+ls - displays directory contents. defaults to current working directory
+    * ls -al will display all hidden files in a list format. i have alias la="ls -al" set up on my personal machines
+    * can specify an optional argument to see the contents of another directory (i.e. ls -al .. to view contents of the parent directory)
+pwd - prints current working directory
+reset - resets the terminal. accidentally try to bring out a bunch of garbage binary data and it fucked everything up? use this
+whoami - prints current user context 
+===== NETWORK-RELATED =====
+
+nc - establishes network connections. can pretty much be used for sending/receiving any data over some sort of network socket.
+nmap - network mapping tool. 
+    * typically used to scan a range of ports on a machine and determine which ports are listening, and which common services may be running on each port.
+ssh - secured network-based terminal session
+telnet - unsecured network-based terminal session 
+===== TEXT HANDLING =====
+
+grep - searches for strings in input/files
+    * common to pipe output into grep, though it can def be used with files depending on the application
+sort - sorts lines of (typically ascii text) and outputs them
+strings - outputs ascii strings located within the input. a string in this instance is defined as 5 or more consecutive characters within printable ascii range
+uniq - outputs unique lines of (typically ascii text) that are fed into it. 
+    * note that this only applies to adjacent lines; the same lines that exist but are not adjacent are considered 'unique' in this context. think of uniq as working in the context of unique consecutive lines, as opposed to globally unique. this can be combined with (or replaced by) sort to find globally unique lines 
+===== MISC. =====
+
+xxd - converts binary files into hexdumps and vice versa. 
+========== BANDIT LEVEL HINTS/NOTES ==========
+ 
+Level 1 -> 2
+    - has a special meaning with some commands, and is is interpreted as a shortcut for stdin/stdout in some cases. if you have a file named -, then chances are a command might treat it as synonymous for stdin/stdout, and you may need to explicitly qualify that you are referring to a file in the current directory with that name using ./-. putting a ./ before a filename tells bash that youre referring to a file in the current directory (where . means the current wording directory)
+
+Level 2 -> 3
+    a file with spaces in its name will not be seen as a single string in bash if not properly escaped. you can get around this by escapting the spaces with \ (i.e. spaces\ in\ the\ filename) or by wrapping the filename in quotes ("spaces in filename"). 
+
+    **NOTE: tab completion is your friend. type the first part of the filename, hit tab, and itll take care of any escaping/etc. necessary for you.
+
+Level 3 -> 4
+    when attempting to navigate an unfamiliar directory/file structure, ls is legitimately going to be your best friend.
+
+Level 4 -> 5
+    remember that if something is not human-readable, it is some other file in a binary format. which means that file will identify them differently than a human-readable (aka ascii text in this instance) file 
+Level 5 -> 6
+    find is your best friend here. looking for:
+        - file type
+        - size
+        - executable attribute set
+
+Level 6 -> 7
+    hmm this looks familiar. what properties are you looking for?
+        - user
+        - group
+        - size
+
+Level 7 -> 8
+    so we need to search a file for the word "millionth" and grab that line of text. how would we do that?
+
+Level 8 -> 9
+    what tools do we have that can find a globally unique line of text in the file?
+
+Level 9 -> 10
+    we need to extract every human-readable string from this file and then search for something... hm. 
+Level 10 -> 11
+    b64 encoding. ez
+
+Level 11 -> 12
+    rot13. hmm. how do we translate one character set to another?
+
+Level 12 -> 13
+    we have a hexdump of repeatedly compress archives.
+        1. convert hexdump back to outermost archive
+        2. figure out the type of archive it is
+        3. decompress with the appropriate tool
+        4. repeat steps 2-4 while you still have compressed archives
+
+Level 13 -> 14
+    the most basic form of ssh is to connect to a machine with a username and a password. but there is a different way to do this, as well; thie secondary way is actually more secure. you can ssh in to a machine with a username and an ssh key in place of a password. wonder how that can be done? how do the arguments to ssh change?
+
+    also, remember - when youre sshing into a machine from itself, the ip/port may look different than if youre doing it from an external machine...
+
+Level 14 -> 15
+    we need to submit the current level password over localhost on port 30000... how would we send arbitrary data over a network connection? 
+
+
+========== GENERAL BASH CONCEPTS ==========
+piping - piping uses the pipe (|, located above the enter key on most US-layout keyboards) to direct the output of one command to the input of another
+    for example, cat *.txt | grep "some string to find" would send all of the input of the cat command to the grep command as input, effectively allowing you to grep all of the output from cat. piping can be chained as much as you need to.
+
+i/o streams - there are three defined standard i/o streams in a linux/bash environment:
+    0 - stdin
+        * this is like when something prompts for input from the user in the terminal environment
+    1 - stdout
+        * this is where most output for a program or command is sent to
+    2 - stderr
+        * any errors or warnings (permission denied, cant find a file, etc.) are sent on this stream
+
+    by default, the two output streams are both output to the terminal, so you get program output + error messages. however, in instances where you do not want to view one or the other, you can redirect output streams using >. for example, to run a command and hide the error messages, you can do cmdhere 2>/dev/null, which would route the output stream 2 (stderr) to /dev/null, which is how you throw things away in linux. by default > will redirect all output streams to whatever file you send it to, but you can specify specific output streams with 1> or 2>.
+navigation shortcuts - there are some built-in shortcuts for navigating the environment/commands
+    . - this denotes the current working directory
+    .. - this denotes the parent directory relative to the current working directory
+    ~ - this denotes the home directory for the current user (typically located in /home/<username)
+    !! - this denotes the most recently executed command. so, for example, sudo !! would execute the last command with sudo
+
+inline command execution - you can wrap commands in `backticks` to evaluate them in-line another command.
+    for example, ls /home/`whoami` would first evaluate the whoami command, replace the `whoami` with its output, and then execute the ls command
+
+    on my machine, ls /home/`whoami` is equivalent to ls /home/kaelin
+tab completion - you can hit <tab> to auto-complete file and directory names based on what has already been typed. use this. abuse it. this will be your best friend. it will save you from tons of unnecesasry typos and time trying to type shit. trust me. use this for everything. use it for files with names that are 3 characters long. use it for directories that are 20 characters long. use it all the time. remember that tab completion is case-sensitive, just like file/directory names in linux
+
+command chaining - you can execute commands sequentially using &&, ||, and ;. the difference between the three:
+    - && will only execute the command(s) on the right-hand side if the command(s) on the left-hand side executed successfully with no errors. if the command(s) on the left-hand side fail or err out, execution will stop. this is a short-circuiting logical AND.
+    - || will execute commands sequentially only if the command(s) on the left-hand side did NOT execute correctly. this is a short-circuiting logical OR
+    - ; is just a separator for commands, and will execute commands on the left- and right-hand sides of it regardless of execution success or error status 
